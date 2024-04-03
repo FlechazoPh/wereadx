@@ -118,7 +118,8 @@ export async function runReadTask(_: Request) {
                 stop = true;
             }
         }
-
+        var messageTxt = `任务(${task.credential.name}:${task.credential.vid}:${task.book.title})成功更新: %c${formatSeconds(totalSeconds)}%c，耗时: ${((Date.now() - taskStartTime) / 1000).toFixed(1)}s`
+        
         console.log(
             `任务(${task.credential.name}:${task.credential.vid}:${task.book.title})成功更新: %c${
                 formatSeconds(totalSeconds)
@@ -126,7 +127,8 @@ export async function runReadTask(_: Request) {
             "color: green;font-weight: bold;",
             "",
         );
-
+        // todo: 发送通知
+        sendTelegramMessage(messageTxt);
         // 写入
         await taskManager.updateReadingTask(credential, totalSeconds);
     }
