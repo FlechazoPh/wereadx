@@ -11,7 +11,7 @@ export async function sendTelegramMessage(text: string): Promise<void> {
 
         const resp = await get(url, {
             chat_id: runtime.chatId,
-            text: text + "\n\n#微信自动阅读任务 \n\nfrom https://busy-condor-50.deno.dev"
+            text: text + "\n\n#微信自动阅读任务 \nfrom https://busy-condor-50.deno.dev"
             }, {})
         
         console.log(`TG Message sent successfully! \n chatId: ${runtime.chatId} botToken: ${runtime.botToken} ${text}`);
