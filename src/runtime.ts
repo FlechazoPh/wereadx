@@ -52,10 +52,26 @@ if (runInDenoDeploy()) {
     cronKey = env["CRON_KEY"] || ''
 }
 
+let botToken: string
+if (runInDenoDeploy()) {
+    botToken = Deno.env.get("DENO_botToken")! || ''
+} else {
+    botToken = env["DENO_botToken"] || ''
+}
+
+let chatId: string
+if (runInDenoDeploy()) {
+    chatId = Deno.env.get("DENO_chatId")! || ''
+} else {
+    chatId = env["DENO_chatId"] || ''
+}
+
 export default {
     deployDomain,
     resendDomain,
     kv,
     databaseUrl,
     cronKey,
+    botToken,
+    chatId
 }
