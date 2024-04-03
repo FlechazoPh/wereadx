@@ -1,4 +1,4 @@
-import {get} from "../../utils/request.ts";
+import {get} from "../utils/request.ts";
 import runtime from "../runtime.ts";
 export async function sendTelegramMessage(text: string): Promise<void> {
     try {
