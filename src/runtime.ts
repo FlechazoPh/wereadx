@@ -31,9 +31,9 @@ let kv: Deno.Kv
 if (runInDenoDeploy() || Deno.args.includes("local")) {
     kv = await Deno.openKv()
 } else {
-    Deno.env.set('DENO_KV_ACCESS_TOKEN', env["DENO_KV_ACCESS_TOKEN"])
+    Deno.env.set('KV_ACCESS_TOKEN', env["KV_ACCESS_TOKEN"])
     kv = await Deno.openKv(
-        `https://api.deno.com/databases/${env["DENO_KV_UUID"]}/connect`,
+        `https://api.deno.com/databases/${env["KV_UUID"]}/connect`,
     );
 }
 
@@ -54,16 +54,16 @@ if (runInDenoDeploy()) {
 
 let botToken: string
 if (runInDenoDeploy()) {
-    botToken = Deno.env.get("DENO_botToken")! || ''
+    botToken = Deno.env.get("botToken")! || ''
 } else {
-    botToken = env["DENO_botToken"] || ''
+    botToken = env["botToken"] || ''
 }
 
 let chatId: string
 if (runInDenoDeploy()) {
-    chatId = Deno.env.get("DENO_chatId")! || ''
+    chatId = Deno.env.get("chatId")! || ''
 } else {
-    chatId = env["DENO_chatId"] || ''
+    chatId = env["chatId"] || ''
 }
 
 export default {
