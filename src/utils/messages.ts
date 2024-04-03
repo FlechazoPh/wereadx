@@ -1,6 +1,6 @@
 import {get} from "../../utils/request.ts";
 import runtime from "../runtime.ts";
-async function sendTelegramMessage(text: string): Promise<void> {
+export async function sendTelegramMessage(text: string): Promise<void> {
     try {
         const url = `https://api.telegram.org/bot${runtime.botToken}/sendMessage`;
         const params = {
