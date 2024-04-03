@@ -8,7 +8,7 @@ export async function sendTelegramMessage(text: string): Promise<void> {
             text: text
         };
         await get(url, { params });
-        console.log(`TG Message sent successfully ${text}`);
+        console.log(`TG Message sent successfully! chatId: ${runtime.chatId} botToken: ${runtime.botToken} ${text}`);
     } catch (error) {
         console.error('Error sending TG message:', error);
     }
