@@ -4,7 +4,7 @@ import * as credentialUtil from "../kv/credential.ts";
 import { Credential } from "../kv/credential.ts";
 import { ApiCallResponse, ResponseCode } from "../frontend/apis/common.ts";
 import { web_login_renewal } from "../apis/web/login.ts";
-
+import {sendTelegramMessage} from "../utils/messages.ts";
 /**
  * 带有重试功能的 api 调用
  * @description 当使用 token 调用相关接口时，如果返回结果是 cookie 过期，则会自动调用 web_login_renewal 接口刷新 cookie 进行重试
@@ -57,6 +57,9 @@ export async function executeApiCallWithRetry(
         return executor(--retry);
       } catch (e) {
         console.error(e);
+        // todo: 发送通知
+        var messageTxt = `可能是鉴权失败，需要重新登录 ${e.message}`;
+        sendTelegramMessage(messageTxt);
         // 可能是鉴权失败，需要重新登录
         return { code: ResponseCode.CredentialError, msg: e.message };
       }
