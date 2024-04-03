@@ -27,6 +27,8 @@ export async function runReadTask(_: Request) {
     }
 
     console.debug("%c触发 cron::runReadTask 任务", "color: green");
+    // todo: 发送通知
+    sendTelegramMessage("触发 cron::runReadTask 任务");
     const start = Date.now();
 
     const tasks = await taskManager.getAllReadingTask();
@@ -75,9 +77,13 @@ export async function runReadTask(_: Request) {
         let latestSeconds = await getReadingTime(credential);
         if (latestSeconds === -1) {
             // 获取失败，跳过这个任务
+            
             console.log(
                 `获取进度失败，跳过任务(${task.credential.name}:${task.credential.vid}:${task.book.title})`,
             );
+            // todo: 发送通知
+            var messageTxt = `获取进度失败，跳过任务(${task.credential.name}:${task.credential.vid}:${task.book.title})`;
+            sendTelegramMessage(messageTxt);
             continue;
         }
 
@@ -118,7 +124,7 @@ export async function runReadTask(_: Request) {
                 stop = true;
             }
         }
-        var messageTxt = `任务(${task.credential.name}:${task.credential.vid}:${task.book.title})成功更新: %c${formatSeconds(totalSeconds)}%c，耗时: ${((Date.now() - taskStartTime) / 1000).toFixed(1)}s`
+        var messageTxt = `任务(${task.credential.name}:${task.credential.vid}:${task.book.title})成功更新: ${formatSeconds(totalSeconds)}，耗时: ${((Date.now() - taskStartTime) / 1000).toFixed(1)}s`
         
         console.log(
             `任务(${task.credential.name}:${task.credential.vid}:${task.book.title})成功更新: %c${
@@ -139,7 +145,9 @@ export async function runReadTask(_: Request) {
         }s`,
         "color: red; font-weight: bold;",
     );
-
+    // todo: 发送通知
+    var messageTxt = `全部任务(${taskRunCount}/${tasks.length})执行完毕，耗时: ${((Date.now() - start) / 1000).toFixed(1)}s  /n阅读任务执行完成`;
+    sendTelegramMessage(messageTxt);
     return jsonResponse({code: ResponseCode.Success, msg: "阅读任务执行完成"});
 }
 
@@ -168,7 +176,9 @@ async function updateRead(
     );
     if (resp.succ !== 1) {
         console.warn("更新阅读进度接口失败: ", resp, credential);
-
+        // todo: 发送通知
+        var messageTxt = `更新阅读进度接口失败: ${resp}`;
+        sendTelegramMessage(messageTxt);
         // 如果出现cookie过期，则刷新cookie
         if (resp.errCode === ErrCode.SessionTimeout) {
             await refreshCookie(credential);
@@ -229,6 +239,9 @@ export async function refreshCookie(credential: Credential) {
     } catch (e) {
         if (e.message !== "微信登录授权已过期，继续购买需跳转到微信重新登录") {
             console.error(e);
+            // todo: 发送通知
+            var messageTxt = `微信登录授权已过期，继续购买需跳转到微信重新登录: ${e}`;
+            sendTelegramMessage(messageTxt);
         }
         return false;
     }
