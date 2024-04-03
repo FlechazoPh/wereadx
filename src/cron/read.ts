@@ -146,7 +146,7 @@ export async function runReadTask(_: Request) {
         "color: red; font-weight: bold;",
     );
     // todo: 发送通知
-    var messageTxt = `全部任务(${taskRunCount}/${tasks.length})执行完毕，耗时: ${((Date.now() - start) / 1000).toFixed(1)}s  /n阅读任务执行完成`;
+    var messageTxt = `全部任务(${taskRunCount}/${tasks.length})执行完毕，耗时: ${((Date.now() - start) / 1000).toFixed(1)}s  \n\n阅读任务执行完成`;
     sendTelegramMessage(messageTxt);
     return jsonResponse({code: ResponseCode.Success, msg: "阅读任务执行完成"});
 }
