@@ -14,7 +14,7 @@ import {ErrCode} from "../apis/err-code.ts";
 import {web_login_renewal} from "../apis/web/login.ts";
 import {pauseReadTask} from "../kv/task.ts";
 import runtime from "../runtime.ts";
-import {sendTelegramMessage} from "../Message.ts";
+import {sendTelegramMessage} from "../utils/Message.ts";
 /**
  * 执行自动阅读任务
  * 由外部的 cron 触发，每 **30分钟** 触发一次
