@@ -5,7 +5,7 @@ import { ResponseCode } from "../frontend/apis/common.ts";
 import { executeApiCallWithRetry } from "./common.ts";
 import type { Credential } from "../kv/credential.ts";
 import runtime from "../runtime.ts";
-
+import {sendTelegramMessage} from "../utils/messages.ts";
 /**
  * 执行兑换体验卡任务
  * 由外部 cron 触发(Cloudflare Worker)
@@ -15,6 +15,9 @@ export async function runExchangeTask(_: Request) {
   const key = new URL(_.url).searchParams.get("key");
   if (key !== runtime.cronKey) {
     console.warn(`外部触发 cron::runExchangeTask 任务，已忽略(${_.url} <- ${_.headers.get('referer')})`)
+    // todo: 发送通知
+    var messageTxt = `外部触发 cron::runExchangeTask 任务，已忽略(${_.url} <- ${_.headers.get('referer')})`;
+    sendTelegramMessage(messageTxt);
     return jsonResponse({code: ResponseCode.Error, msg: '非正常触发，已忽略'})
   }
 
@@ -40,6 +43,8 @@ export async function runExchangeTask(_: Request) {
       // 重试失败
     }
   }
-
+  // todo: 发送通知
+  var messageTxt = `兑换任务执行完成`;
+  sendTelegramMessage(messageTxt);
   return jsonResponse({ code: ResponseCode.Success, msg: "兑换任务执行完成" });
 }
