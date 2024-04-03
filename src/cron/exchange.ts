@@ -23,7 +23,9 @@ export async function runExchangeTask(_: Request) {
 
 
   console.debug("触发 cron::runExchangeTask 任务");
-
+  // todo: 发送通知
+  var messageTxt = `触发 cron::runExchangeTask 任务`;
+  sendTelegramMessage(messageTxt);
   // 从配置中读取有哪些用户需要兑换
   const users: number[] = [];
 
