@@ -81,7 +81,7 @@ export async function runReadTask(_: Request) {
 
         let stop = false;
         let totalSeconds = 0;
-        const readTime = 60; // 每次更新的阅读时长，单位为秒
+        const readTime = 120; // 每次更新的阅读时长，单位为秒
 
         while (!stop) {
             const resp = await updateRead(
