@@ -1,4 +1,4 @@
-import axios from 'axios';
+import {get} from "../../utils/request.ts";
 import runtime from "../runtime.ts";
 async function sendTelegramMessage(text: string): Promise<void> {
     try {
@@ -7,7 +7,7 @@ async function sendTelegramMessage(text: string): Promise<void> {
             chat_id: runtime.chatId,
             text: text
         };
-        await axios.get(url, { params });
+        await get(url, { params });
         console.log('TG Message sent successfully');
     } catch (error) {
         console.error('Error sending TG message:', error);
