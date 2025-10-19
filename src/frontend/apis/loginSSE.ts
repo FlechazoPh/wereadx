@@ -24,9 +24,11 @@ export function loginSSE(_: Request): Response {
             try {
                 const {uid} = await web_login_getuid();
                 const url = web_confirm(uid);
+                console.log("url: ", url);
                 sendEvent(isClosed, controller, "qrcode", url);
 
                 const info = await web_login_getinfo(uid);
+                console.log("info: ", info);
                 if (isClosed) {
                     return
                 }
@@ -36,18 +38,21 @@ export function loginSSE(_: Request): Response {
                     return;
                 }
 
-                const auth = await web_login_weblogin(info);
-                const resp = await web_login_session_init(auth);
+                // const auth = await web_login_weblogin(info);
+                // console.log("auth: ", auth);
+                const resp = await web_login_session_init(info);
+                console.log("resp: ", resp);
                 if (resp.success === 1) {
                     // 登录成功，生成一个随机数作为前端的 token
                     const token = getUlid();
                     // 获取用户名
-                    const userResp = await web_user(auth.vid, `wr_vid=${auth.vid};wr_skey=${auth.accessToken};wr_rt=${auth.refreshToken};`)
+                    // const userResp = await web_user(auth.vid, `wr_vid=${auth.vid};wr_skey=${auth.accessToken};wr_rt=${auth.refreshToken};`)
+                    const userResp = await web_user(info.vid, `wr_vid=${info.vid};wr_skey=${info.skey};wr_rt=${info.code};`)
                     const credential: Credential = {
                         token: token,
-                        vid: Number(auth.vid),
-                        skey: auth.accessToken,
-                        rt: auth.refreshToken,
+                        vid: Number(info.vid),
+                        skey: info.skey,
+                        rt: info.code,
                         updatedAt: Date.now(),
                         name: userResp.name || 'unknown',
                     }

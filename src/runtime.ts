@@ -3,11 +3,13 @@ import {runInDenoDeploy} from "./utils/index.ts";
 
 let env = await dotenv.load()
 
+
 if (Object.keys(env).length === 0) {
     env = {
         DATABASE_URL: "postgresql://postgres:1@example.com:5432/postgres"
     }
 }
+
 
 let deployDomain: string
 if (runInDenoDeploy()) {

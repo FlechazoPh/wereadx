@@ -50,8 +50,8 @@ export async function web_login_session_init(info: Record<string, any> = {}) {
   const params = {
     vid: info.vid,
     pf: 0,
-    skey: info.accessToken,
-    rt: info.refreshToken,
+    skey: info.skey,
+    rt: info.code,
   };
   const resp = await postJSON(
     "https://weread.qq.com/web/login/session/init",
