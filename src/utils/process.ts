@@ -1,6 +1,6 @@
 // @ts-nocheck: 使用 for of 遍历 node.attributes 会报错，实际上并没有问题
 
-import { parseHTML } from "https://esm.sh/linkedom";
+import { parseHTML } from "npm:linkedom@0.18.5";
 
 /**
  * 8.js中的 UPDATE_READER_CONTENT_HTML 和 UPDATE_READER_CONTENT_STYLES 这两个 mutation

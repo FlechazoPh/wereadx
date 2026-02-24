@@ -1,12 +1,13 @@
 {
   "nodeModulesDir": "auto",
   "tasks": {
-    "dev": "deno run -A --unstable --unstable-kv src/server.ts local",
-    "serve": "deno run -A --unstable --unstable-kv src/server.ts"
+    "dev": "deno run -A --unstable-kv src/server.ts local",
+    "serve": "deno run -A --unstable-kv src/server.ts"
   },
   "imports": {
     "crypto-js": "npm:crypto-js@4.2.0",
     "xss": "npm:xss@1.0.14",
-    "parse5": "npm:parse5@7.1.2"
+    "parse5": "npm:parse5@7.1.2",
+    "linkedom": "npm:linkedom@0.18.5"
   }
 }
