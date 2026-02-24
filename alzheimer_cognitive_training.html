@@ -1,0 +1,1197 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>阿尔兹海默症认知训练游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        main {
+            width: 100%;
+            max-width: 900px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .game-selection {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .game-card {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            width: 250px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-color: #3498db;
+        }
+
+        .game-card.active {
+            background-color: #e3f2fd;
+            border-color: #2196f3;
+        }
+
+        .game-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .game-title {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .game-description {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        .difficulty-selection {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .difficulty-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .difficulty-btn:hover {
+            background-color: #d5dbdd;
+        }
+
+        .difficulty-btn.active {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .game-area {
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+
+        .score-display {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .message {
+            text-align: center;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 1.1rem;
+        }
+
+        .success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+
+        .error {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+
+        .info {
+            background-color: #e3f2fd;
+            color: #1565c0;
+            border: 1px solid #bbdefb;
+        }
+
+        /* Memory Game Styles */
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .memory-card {
+            aspect-ratio: 1;
+            background-color: #3498db;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .memory-card:hover {
+            transform: scale(1.05);
+        }
+
+        .memory-card.flipped {
+            background-color: #ecf0f1;
+            color: #2c3e50;
+        }
+
+        .memory-card.matched {
+            background-color: #2ecc71;
+            color: white;
+            pointer-events: none;
+        }
+
+        /* Puzzle Game Styles */
+        .puzzle-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            max-width: 300px;
+            margin: 0 auto;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .puzzle-piece {
+            aspect-ratio: 1;
+            background-color: #ecf0f1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .puzzle-piece:hover {
+            background-color: #d5dbdd;
+        }
+
+        .puzzle-piece.empty {
+            background-color: #3498db;
+            cursor: default;
+        }
+
+        /* Word Association Game Styles */
+        .word-display {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+
+        .word-options {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .word-option {
+            padding: 15px 20px;
+            background-color: #ecf0f1;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .word-option:hover {
+            background-color: #d5dbdd;
+        }
+
+        .word-option.correct {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .word-option.incorrect {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        /* Math Game Styles */
+        .math-problem {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+
+        .math-input {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .math-input input {
+            padding: 10px 15px;
+            font-size: 1.5rem;
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            width: 150px;
+            text-align: center;
+        }
+
+        /* Pattern Game Styles */
+        .pattern-display {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .pattern-item {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .pattern-input {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .pattern-option {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pattern-option:hover {
+            transform: scale(1.05);
+        }
+
+        .pattern-option.selected {
+            border: 3px solid #3498db;
+        }
+
+        footer {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>阿尔兹海默症认知训练游戏</h1>
+        <p class="subtitle">通过有趣的游戏锻炼记忆力、注意力和思维能力</p>
+    </header>
+
+    <main>
+        <section class="game-selection">
+            <div class="game-card" data-game="memory">
+                <div class="game-icon">🧩</div>
+                <h3 class="game-title">记忆配对</h3>
+                <p class="game-description">翻转卡片，找出相同的配对</p>
+            </div>
+            <div class="game-card" data-game="puzzle">
+                <div class="game-icon">🔢</div>
+                <h3 class="game-title">数字拼图</h3>
+                <p class="game-description">移动数字方块，按顺序排列</p>
+            </div>
+            <div class="game-card" data-game="word">
+                <div class="game-icon">📝</div>
+                <h3 class="game-title">词汇联想</h3>
+                <p class="game-description">选择与显示词语相关的词汇</p>
+            </div>
+            <div class="game-card" data-game="math">
+                <div class="game-icon">➕</div>
+                <h3 class="game-title">数学计算</h3>
+                <p class="game-description">解决简单的数学问题</p>
+            </div>
+            <div class="game-card" data-game="pattern">
+                <div class="game-icon">🔲</div>
+                <h3 class="game-title">图形识别</h3>
+                <p class="game-description">识别并完成图形序列</p>
+            </div>
+        </section>
+
+        <section class="difficulty-selection">
+            <button class="difficulty-btn active" data-level="easy">简单</button>
+            <button class="difficulty-btn" data-level="medium">中等</button>
+            <button class="difficulty-btn" data-level="hard">困难</button>
+        </section>
+
+        <div class="score-display">
+            得分: <span id="score">0</span> | 回合: <span id="round">1</span>
+        </div>
+
+        <div id="message-area"></div>
+
+        <section class="game-area" id="game-area">
+            <div class="info message">
+                请选择一个游戏类型和难度，然后点击"开始游戏"按钮
+            </div>
+        </section>
+
+        <div class="game-controls">
+            <button class="btn btn-primary" id="start-game">开始游戏</button>
+            <button class="btn btn-secondary" id="reset-game">重置游戏</button>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2023 阿尔兹海默症认知训练游戏 | 专为认知训练设计</p>
+    </footer>
+
+    <script>
+        // 游戏状态
+        let gameState = {
+            currentGame: null,
+            difficulty: 'easy',
+            score: 0,
+            round: 1,
+            gameData: {},
+            isPlaying: false
+        };
+
+        // DOM 元素
+        const gameCards = document.querySelectorAll('.game-card');
+        const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+        const startBtn = document.getElementById('start-game');
+        const resetBtn = document.getElementById('reset-game');
+        const gameArea = document.getElementById('game-area');
+        const scoreDisplay = document.getElementById('score');
+        const roundDisplay = document.getElementById('round');
+        const messageArea = document.getElementById('message-area');
+
+        // 游戏选择
+        gameCards.forEach(card => {
+            card.addEventListener('click', () => {
+                if (gameState.isPlaying) return;
+
+                gameCards.forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                gameState.currentGame = card.dataset.game;
+                showMessage('info', `已选择${card.querySelector('.game-title').textContent}游戏`);
+            });
+        });
+
+        // 难度选择
+        difficultyBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (gameState.isPlaying) return;
+
+                difficultyBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                gameState.difficulty = btn.dataset.level;
+
+                const difficultyText = btn.textContent;
+                showMessage('info', `已设置为${difficultyText}难度`);
+            });
+        });
+
+        // 开始游戏
+        startBtn.addEventListener('click', () => {
+            if (!gameState.currentGame) {
+                showMessage('error', '请先选择一个游戏类型');
+                return;
+            }
+
+            gameState.isPlaying = true;
+            startBtn.disabled = true;
+
+            switch (gameState.currentGame) {
+                case 'memory':
+                    initMemoryGame();
+                    break;
+                case 'puzzle':
+                    initPuzzleGame();
+                    break;
+                case 'word':
+                    initWordGame();
+                    break;
+                case 'math':
+                    initMathGame();
+                    break;
+                case 'pattern':
+                    initPatternGame();
+                    break;
+            }
+        });
+
+        // 重置游戏
+        resetBtn.addEventListener('click', () => {
+            gameState = {
+                currentGame: gameState.currentGame,
+                difficulty: gameState.difficulty,
+                score: 0,
+                round: 1,
+                gameData: {},
+                isPlaying: false
+            };
+
+            updateScore();
+            gameArea.innerHTML = '<div class="info message">游戏已重置，请点击"开始游戏"重新开始</div>';
+            startBtn.disabled = false;
+        });
+
+        // 显示消息
+        function showMessage(type, message) {
+            messageArea.innerHTML = `<div class="message ${type}">${message}</div>`;
+
+            if (type === 'success' || type === 'error') {
+                setTimeout(() => {
+                    messageArea.innerHTML = '';
+                }, 3000);
+            }
+        }
+
+        // 更新分数
+        function updateScore() {
+            scoreDisplay.textContent = gameState.score;
+            roundDisplay.textContent = gameState.round;
+        }
+
+        // 记忆配对游戏
+        function initMemoryGame() {
+            gameArea.innerHTML = '';
+
+            let gridSize;
+            switch (gameState.difficulty) {
+                case 'easy':
+                    gridSize = 12; // 3x4
+                    break;
+                case 'medium':
+                    gridSize = 16; // 4x4
+                    break;
+                case 'hard':
+                    gridSize = 20; // 4x5
+                    break;
+            }
+
+            // 创建卡片对
+            const emojis = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🐦', '🐤', '🦆'];
+            const cardPairs = [];
+
+            for (let i = 0; i < gridSize / 2; i++) {
+                const emoji = emojis[i % emojis.length];
+                cardPairs.push(emoji, emoji);
+            }
+
+            // 洗牌
+            for (let i = cardPairs.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cardPairs[i], cardPairs[j]] = [cardPairs[j], cardPairs[i]];
+            }
+
+            // 创建游戏网格
+            const grid = document.createElement('div');
+            grid.className = 'memory-grid';
+
+            // 根据卡片数量调整网格列数
+            if (gridSize === 12) {
+                grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+            } else if (gridSize === 16) {
+                grid.style.gridTemplateColumns = 'repeat(4, 1fr)';
+            } else {
+                grid.style.gridTemplateColumns = 'repeat(5, 1fr)';
+            }
+
+            // 创建卡片
+            const cards = [];
+            let flippedCards = [];
+            let matchedPairs = 0;
+
+            cardPairs.forEach((emoji, index) => {
+                const card = document.createElement('div');
+                card.className = 'memory-card';
+                card.dataset.index = index;
+                card.dataset.emoji = emoji;
+                card.textContent = '?';
+
+                card.addEventListener('click', function() {
+                    if (this.classList.contains('flipped') || this.classList.contains('matched') || flippedCards.length >= 2) {
+                        return;
+                    }
+
+                    this.classList.add('flipped');
+                    this.textContent = emoji;
+                    flippedCards.push(this);
+
+                    if (flippedCards.length === 2) {
+                        const [card1, card2] = flippedCards;
+
+                        if (card1.dataset.emoji === card2.dataset.emoji) {
+                            // 匹配成功
+                            card1.classList.add('matched');
+                            card2.classList.add('matched');
+                            matchedPairs++;
+
+                            gameState.score += 10;
+                            updateScore();
+
+                            if (matchedPairs === gridSize / 2) {
+                                gameState.round++;
+                                updateScore();
+                                showMessage('success', '恭喜！你完成了这一轮！');
+                                setTimeout(() => {
+                                    initMemoryGame();
+                                }, 2000);
+                            }
+
+                            flippedCards = [];
+                        } else {
+                            // 匹配失败
+                            setTimeout(() => {
+                                card1.classList.remove('flipped');
+                                card2.classList.remove('flipped');
+                                card1.textContent = '?';
+                                card2.textContent = '?';
+                                flippedCards = [];
+                            }, 1000);
+                        }
+                    }
+                });
+
+                cards.push(card);
+                grid.appendChild(card);
+            });
+
+            gameArea.appendChild(grid);
+            showMessage('info', '找出所有配对的卡片');
+        }
+
+        // 数字拼图游戏
+        function initPuzzleGame() {
+            gameArea.innerHTML = '';
+
+            const grid = document.createElement('div');
+            grid.className = 'puzzle-grid';
+
+            let puzzleSize;
+            switch (gameState.difficulty) {
+                case 'easy':
+                    puzzleSize = 3; // 3x3
+                    break;
+                case 'medium':
+                    puzzleSize = 4; // 4x4
+                    break;
+                case 'hard':
+                    puzzleSize = 5; // 5x5
+                    break;
+            }
+
+            // 根据拼图大小调整网格
+            grid.style.gridTemplateColumns = `repeat(${puzzleSize}, 1fr)`;
+
+            // 创建拼图块
+            const tiles = [];
+            const totalTiles = puzzleSize * puzzleSize;
+
+            for (let i = 1; i < totalTiles; i++) {
+                tiles.push(i);
+            }
+            tiles.push(null); // 空白块
+
+            // 洗牌
+            for (let i = tiles.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
+            }
+
+            // 确保拼图可解
+            if (!isSolvable(tiles, puzzleSize)) {
+                // 如果不可解，交换两个非空块
+                let firstIndex = -1, secondIndex = -1;
+                for (let i = 0; i < tiles.length; i++) {
+                    if (tiles[i] !== null) {
+                        if (firstIndex === -1) {
+                            firstIndex = i;
+                        } else {
+                            secondIndex = i;
+                            break;
+                        }
+                    }
+                }
+                [tiles[firstIndex], tiles[secondIndex]] = [tiles[secondIndex], tiles[firstIndex]];
+            }
+
+            // 创建拼图块元素
+            let emptyIndex = tiles.indexOf(null);
+            let moveCount = 0;
+
+            tiles.forEach((tile, index) => {
+                const tileElement = document.createElement('div');
+                tileElement.className = 'puzzle-piece';
+                tileElement.dataset.index = index;
+
+                if (tile === null) {
+                    tileElement.classList.add('empty');
+                } else {
+                    tileElement.textContent = tile;
+                    tileElement.addEventListener('click', function() {
+                        const clickedIndex = parseInt(this.dataset.index);
+
+                        // 检查是否可以移动
+                        if (canMove(clickedIndex, emptyIndex, puzzleSize)) {
+                            // 交换位置
+                            [tiles[clickedIndex], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[clickedIndex]];
+
+                            // 更新UI
+                            updatePuzzleGrid(grid, tiles, puzzleSize);
+
+                            // 更新空白位置
+                            emptyIndex = clickedIndex;
+
+                            // 增加移动次数
+                            moveCount++;
+
+                            // 检查是否完成
+                            if (checkPuzzleComplete(tiles)) {
+                                gameState.score += Math.max(10, 50 - moveCount);
+                                gameState.round++;
+                                updateScore();
+                                showMessage('success', `恭喜！你用了${moveCount}步完成了拼图！`);
+                                setTimeout(() => {
+                                    initPuzzleGame();
+                                }, 2000);
+                            }
+                        }
+                    });
+                }
+
+                grid.appendChild(tileElement);
+            });
+
+            gameArea.appendChild(grid);
+            showMessage('info', '移动数字方块，按顺序排列');
+
+            // 检查拼图是否可解
+            function isSolvable(tiles, size) {
+                let inversions = 0;
+                const flatTiles = tiles.filter(t => t !== null);
+
+                for (let i = 0; i < flatTiles.length - 1; i++) {
+                    for (let j = i + 1; j < flatTiles.length; j++) {
+                        if (flatTiles[i] > flatTiles[j]) {
+                            inversions++;
+                        }
+                    }
+                }
+
+                if (size % 2 === 1) {
+                    return inversions % 2 === 0;
+                } else {
+                    const emptyRow = Math.floor(tiles.indexOf(null) / size);
+                    return (inversions + emptyRow) % 2 === 1;
+                }
+            }
+
+            // 检查是否可以移动
+            function canMove(clickedIndex, emptyIndex, size) {
+                const clickedRow = Math.floor(clickedIndex / size);
+                const clickedCol = clickedIndex % size;
+                const emptyRow = Math.floor(emptyIndex / size);
+                const emptyCol = emptyIndex % size;
+
+                // 检查是否在同一行或同一列，且相邻
+                return (clickedRow === emptyRow && Math.abs(clickedCol - emptyCol) === 1) ||
+                       (clickedCol === emptyCol && Math.abs(clickedRow - emptyRow) === 1);
+            }
+
+            // 更新拼图网格
+            function updatePuzzleGrid(grid, tiles, size) {
+                const tileElements = grid.querySelectorAll('.puzzle-piece');
+
+                tiles.forEach((tile, index) => {
+                    const tileElement = tileElements[index];
+
+                    if (tile === null) {
+                        tileElement.className = 'puzzle-piece empty';
+                        tileElement.textContent = '';
+                        tileElement.dataset.index = index;
+                    } else {
+                        tileElement.className = 'puzzle-piece';
+                        tileElement.textContent = tile;
+                        tileElement.dataset.index = index;
+                    }
+                });
+            }
+
+            // 检查拼图是否完成
+            function checkPuzzleComplete(tiles) {
+                for (let i = 0; i < tiles.length - 1; i++) {
+                    if (tiles[i] !== i + 1) {
+                        return false;
+                    }
+                }
+                return tiles[tiles.length - 1] === null;
+            }
+        }
+
+        // 词汇联想游戏
+        function initWordGame() {
+            gameArea.innerHTML = '';
+
+            let wordSet;
+            let optionsCount;
+
+            switch (gameState.difficulty) {
+                case 'easy':
+                    wordSet = [
+                        { word: '苹果', options: ['香蕉', '桌子', '汽车', '书本'], correct: 0 },
+                        { word: '狗', options: ['猫', '椅子', '电脑', '电视'], correct: 0 },
+                        { word: '红色', options: ['蓝色', '方形', '甜味', '响亮'], correct: 0 },
+                        { word: '夏天', options: ['冬天', '星期一', '汽车', '书本'], correct: 0 },
+                        { word: '眼睛', options: ['耳朵', '桌子', '电脑', '电视'], correct: 0 }
+                    ];
+                    optionsCount = 4;
+                    break;
+                case 'medium':
+                    wordSet = [
+                        { word: '医生', options: ['护士', '厨师', '教师', '司机'], correct: 0 },
+                        { word: '火车', options: ['飞机', '自行车', '轮船', '汽车'], correct: 0 },
+                        { word: '悲伤', options: ['快乐', '方形', '甜味', '响亮'], correct: 0 },
+                        { word: '图书馆', options: ['博物馆', '银行', '医院', '学校'], correct: 0 },
+                        { word: '钢琴', options: ['小提琴', '桌子', '电脑', '电视'], correct: 0 }
+                    ];
+                    optionsCount = 4;
+                    break;
+                case 'hard':
+                    wordSet = [
+                        { word: '民主', options: ['专制', '自由', '方形', '甜味'], correct: 1 },
+                        { word: '隐喻', options: ['明喻', '厨师', '教师', '司机'], correct: 0 },
+                        { word: '抽象', options: ['具体', '方形', '甜味', '响亮'], correct: 0 },
+                        { word: '假设', options: ['结论', '银行', '医院', '学校'], correct: 0 },
+                        { word: '分析', options: ['综合', '桌子', '电脑', '电视'], correct: 0 }
+                    ];
+                    optionsCount = 4;
+                    break;
+            }
+
+            // 随机选择一个词
+            const currentWord = wordSet[Math.floor(Math.random() * wordSet.length)];
+
+            // 创建词汇显示
+            const wordDisplay = document.createElement('div');
+            wordDisplay.className = 'word-display';
+            wordDisplay.textContent = currentWord.word;
+
+            // 创建选项
+            const optionsContainer = document.createElement('div');
+            optionsContainer.className = 'word-options';
+
+            // 打乱选项顺序
+            const shuffledOptions = [...currentWord.options];
+            for (let i = shuffledOptions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+            }
+
+            // 获取正确答案在新顺序中的索引
+            const correctIndex = shuffledOptions.indexOf(currentWord.options[currentWord.correct]);
+
+            shuffledOptions.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'word-option';
+                optionElement.textContent = option;
+
+                optionElement.addEventListener('click', function() {
+                    // 禁用所有选项
+                    const allOptions = document.querySelectorAll('.word-option');
+                    allOptions.forEach(opt => {
+                        opt.style.pointerEvents = 'none';
+                    });
+
+                    if (index === correctIndex) {
+                        this.classList.add('correct');
+                        gameState.score += 10;
+                        updateScore();
+                        showMessage('success', '正确！');
+
+                        setTimeout(() => {
+                            gameState.round++;
+                            updateScore();
+                            initWordGame();
+                        }, 1500);
+                    } else {
+                        this.classList.add('incorrect');
+                        document.querySelectorAll('.word-option')[correctIndex].classList.add('correct');
+                        showMessage('error', '错误，请再试一次！');
+
+                        setTimeout(() => {
+                            gameState.round++;
+                            updateScore();
+                            initWordGame();
+                        }, 2000);
+                    }
+                });
+
+                optionsContainer.appendChild(optionElement);
+            });
+
+            gameArea.appendChild(wordDisplay);
+            gameArea.appendChild(optionsContainer);
+            showMessage('info', '选择与显示词语相关的词汇');
+        }
+
+        // 数学计算游戏
+        function initMathGame() {
+            gameArea.innerHTML = '';
+
+            let min, max;
+            switch (gameState.difficulty) {
+                case 'easy':
+                    min = 1;
+                    max = 10;
+                    break;
+                case 'medium':
+                    min = 10;
+                    max = 50;
+                    break;
+                case 'hard':
+                    min = 50;
+                    max = 100;
+                    break;
+            }
+
+            // 生成随机数学问题
+            const operations = ['+', '-', '×'];
+            const operation = operations[Math.floor(Math.random() * operations.length)];
+
+            let num1, num2, answer;
+
+            switch (operation) {
+                case '+':
+                    num1 = Math.floor(Math.random() * (max - min + 1)) + min;
+                    num2 = Math.floor(Math.random() * (max - min + 1)) + min;
+                    answer = num1 + num2;
+                    break;
+                case '-':
+                    num1 = Math.floor(Math.random() * (max - min + 1)) + min;
+                    num2 = Math.floor(Math.random() * (num1 - min + 1)) + min; // 确保结果为正数
+                    answer = num1 - num2;
+                    break;
+                case '×':
+                    // 对于乘法，使用较小的数字
+                    num1 = Math.floor(Math.random() * (Math.min(max, 20) - min + 1)) + min;
+                    num2 = Math.floor(Math.random() * (Math.min(max, 10) - min + 1)) + min;
+                    answer = num1 * num2;
+                    break;
+            }
+
+            // 创建问题显示
+            const problemDisplay = document.createElement('div');
+            problemDisplay.className = 'math-problem';
+            problemDisplay.textContent = `${num1} ${operation} ${num2} = ?`;
+
+            // 创建答案输入
+            const inputContainer = document.createElement('div');
+            inputContainer.className = 'math-input';
+
+            const answerInput = document.createElement('input');
+            answerInput.type = 'number';
+            answerInput.placeholder = '答案';
+
+            const submitBtn = document.createElement('button');
+            submitBtn.className = 'btn btn-primary';
+            submitBtn.textContent = '提交';
+
+            submitBtn.addEventListener('click', () => {
+                const userAnswer = parseInt(answerInput.value);
+
+                if (isNaN(userAnswer)) {
+                    showMessage('error', '请输入一个有效的数字');
+                    return;
+                }
+
+                if (userAnswer === answer) {
+                    gameState.score += 10;
+                    updateScore();
+                    showMessage('success', '正确！');
+
+                    setTimeout(() => {
+                        gameState.round++;
+                        updateScore();
+                        initMathGame();
+                    }, 1500);
+                } else {
+                    showMessage('error', `错误！正确答案是 ${answer}`);
+
+                    setTimeout(() => {
+                        gameState.round++;
+                        updateScore();
+                        initMathGame();
+                    }, 2000);
+                }
+            });
+
+            answerInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    submitBtn.click();
+                }
+            });
+
+            inputContainer.appendChild(answerInput);
+            inputContainer.appendChild(submitBtn);
+
+            gameArea.appendChild(problemDisplay);
+            gameArea.appendChild(inputContainer);
+            showMessage('info', '解决数学问题');
+
+            // 聚焦到输入框
+            setTimeout(() => {
+                answerInput.focus();
+            }, 100);
+        }
+
+        // 图形识别游戏
+        function initPatternGame() {
+            gameArea.innerHTML = '';
+
+            let patternLength;
+            let colors;
+
+            switch (gameState.difficulty) {
+                case 'easy':
+                    patternLength = 3;
+                    colors = ['red', 'blue', 'green'];
+                    break;
+                case 'medium':
+                    patternLength = 4;
+                    colors = ['red', 'blue', 'green', 'yellow'];
+                    break;
+                case 'hard':
+                    patternLength = 5;
+                    colors = ['red', 'blue', 'green', 'yellow', 'purple'];
+                    break;
+            }
+
+            // 生成随机模式
+            const pattern = [];
+            for (let i = 0; i < patternLength; i++) {
+                pattern.push(colors[Math.floor(Math.random() * colors.length)]);
+            }
+
+            // 创建模式显示
+            const patternDisplay = document.createElement('div');
+            patternDisplay.className = 'pattern-display';
+
+            pattern.forEach(color => {
+                const item = document.createElement('div');
+                item.className = 'pattern-item';
+                item.style.backgroundColor = color;
+                patternDisplay.appendChild(item);
+            });
+
+            // 创建选项
+            const optionsContainer = document.createElement('div');
+            optionsContainer.className = 'pattern-input';
+
+            // 生成选项，包括正确答案和干扰项
+            const options = [pattern];
+
+            for (let i = 0; i < 4; i++) {
+                const option = [];
+                for (let j = 0; j < patternLength; j++) {
+                    option.push(colors[Math.floor(Math.random() * colors.length)]);
+                }
+
+                // 确保选项与模式不完全相同
+                let isSame = true;
+                for (let j = 0; j < patternLength; j++) {
+                    if (option[j] !== pattern[j]) {
+                        isSame = false;
+                        break;
+                    }
+                }
+
+                if (!isSame) {
+                    options.push(option);
+                }
+            }
+
+            // 打乱选项顺序
+            for (let i = options.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [options[i], options[j]] = [options[j], options[i]];
+            }
+
+            // 获取正确答案在新顺序中的索引
+            const correctIndex = options.findIndex(opt => {
+                for (let i = 0; i < patternLength; i++) {
+                    if (opt[i] !== pattern[i]) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+
+            // 显示选项
+            options.forEach((option, index) => {
+                const optionContainer = document.createElement('div');
+                optionContainer.className = 'pattern-option';
+
+                option.forEach(color => {
+                    const item = document.createElement('div');
+                    item.style.width = '100%';
+                    item.style.height = '100%';
+                    item.style.backgroundColor = color;
+                    item.style.borderRadius = '8px';
+                    optionContainer.appendChild(item);
+                });
+
+                optionContainer.addEventListener('click', function() {
+                    // 禁用所有选项
+                    const allOptions = document.querySelectorAll('.pattern-option');
+                    allOptions.forEach(opt => {
+                        opt.style.pointerEvents = 'none';
+                    });
+
+                    if (index === correctIndex) {
+                        this.classList.add('selected');
+                        gameState.score += 10;
+                        updateScore();
+                        showMessage('success', '正确！');
+
+                        setTimeout(() => {
+                            gameState.round++;
+                            updateScore();
+                            initPatternGame();
+                        }, 1500);
+                    } else {
+                        this.classList.add('incorrect');
+                        document.querySelectorAll('.pattern-option')[correctIndex].classList.add('selected');
+                        showMessage('error', '错误，请再试一次！');
+
+                        setTimeout(() => {
+                            gameState.round++;
+                            updateScore();
+                            initPatternGame();
+                        }, 2000);
+                    }
+                });
+
+                optionsContainer.appendChild(optionContainer);
+            });
+
+            gameArea.appendChild(patternDisplay);
+            gameArea.appendChild(optionsContainer);
+            showMessage('info', '选择与上面相同的模式');
+        }
+    </script>
+</body>
+</html>
