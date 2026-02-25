@@ -72,7 +72,7 @@ export async function checkParams(
                 return jsonResponse({code: p.statusCode, msg: p.statusText})
             }
         }
-
+      
         result[p.name] = value;
     }
     return result;
@@ -163,4 +163,17 @@ export function sendEvent(
     if (!isClosed) {
         controller.enqueue(encoder.encode(payload));
     }
+}
+
+// 封装一个通用工具函数
+export function getUrlParam(url, key, defaultValue = null) {
+  try {
+    const value = new URL(url).searchParams.get(key);
+    return value !== null ? value : defaultValue;
+  } catch (e) {
+    // 解析失败时降级处理
+    const regex = new RegExp(`[?&]${key}=([^&#]*)`, 'i');
+    const match = url.match(regex);
+    return match ? decodeURIComponent(match[1]) : defaultValue;
+  }
 }

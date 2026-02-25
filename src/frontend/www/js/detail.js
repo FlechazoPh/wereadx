@@ -4,6 +4,7 @@ import {Book} from "../epub/epub.js";
 let bookDetail = null
 let bookToc = []
 let evtSource
+let totalChapterCount = 0
 
 
 window.addEventListener('DOMContentLoaded', async () => {
@@ -12,9 +13,39 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     await fetchAndRenderBookInfo(token)
 
+    // 清空范围选择按钮
+    document.querySelector('.clear-range').addEventListener('click', () => {
+        document.querySelector('.chapter-start').value = '';
+        document.querySelector('.chapter-end').value = '';
+    })
+
+    // 验证章节范围输入
+    const validateChapterRange = () => {
+        const start = parseInt(document.querySelector('.chapter-start').value) || 0
+        const end = parseInt(document.querySelector('.chapter-end').value) || 0
+
+        if (start > 0 && end > 0 && start > end) {
+            alert('起始章节不能大于结束章节')
+            return false
+        }
+        if (start > totalChapterCount) {
+            alert(`起始章节不能大于总章节数 ${totalChapterCount}`)
+            return false
+        }
+        if (end > totalChapterCount) {
+            alert(`结束章节不能大于总章节数 ${totalChapterCount}`)
+            return false
+        }
+        return true
+    }
+
     // 下载 html
     document.querySelector('.download_html_btn').addEventListener('click', async () => {
         await sleep(100)
+
+        if (!validateChapterRange()) {
+            return
+        }
 
         document.querySelector('.download_btn').classList.add('disabled')
         const resp = await getDownloadSecret(bookId, token).finally(() => {
@@ -27,6 +58,10 @@ window.addEventListener('DOMContentLoaded', async () => {
     // 下载 epub
     document.querySelector('.download_epub_btn').addEventListener('click', async () => {
         await sleep(100)
+
+        if (!validateChapterRange()) {
+            return
+        }
 
         document.querySelector('.download_btn').classList.add('disabled')
         const resp = await getDownloadSecret(bookId, token).finally(() => {
@@ -128,14 +163,17 @@ function renderBookMetaInfo(book) {
 /**
  * 渲染书籍的目录
  * @param toc
+ * @param chapterCounter - 章节计数器对象 {value: number}
  */
-function renderToc(toc) {
+function renderToc(toc, chapterCounter = {value: 0}) {
     let html = '<ol>'
     for (let i = 0; i < toc.length; i++) {
         const {title, children} = toc[i]
-        html += `<li><a>${title}</a>`
+        chapterCounter.value++
+        const chapterNum = chapterCounter.value
+        html += `<li><a><span style="color: #666; margin-right: 8px;">[${chapterNum}]</span>${title}</a>`
         if (Array.isArray(children) && children.length > 0) {
-            html += renderToc(children)
+            html += renderToc(children, chapterCounter)
         }
         html += '</li>'
     }
@@ -201,7 +239,21 @@ async function fetchAndRenderBookInfo(token) {
     // 构造成树形结构
     bookToc = convertChaptersToToc(chapters)
 
-    document.querySelector('#toc').innerHTML = renderToc(bookToc)
+    const counter = {value: 0}
+    const tocHtml = renderToc(bookToc, counter)
+    const totalChapters = counter.value
+
+    // 保存总章节数到全局变量
+    totalChapterCount = totalChapters
+
+    // 更新章节范围输入框的提示和最大值
+    document.querySelector('.chapter-start').setAttribute('max', totalChapters)
+    document.querySelector('.chapter-start').setAttribute('placeholder', `1-${totalChapters}`)
+    document.querySelector('.chapter-end').setAttribute('max', totalChapters)
+    document.querySelector('.chapter-end').setAttribute('placeholder', `1-${totalChapters}`)
+
+    // 在目录前显示总章节数
+    document.querySelector('#toc').innerHTML = `<div style="color: #999; font-size: 12px; margin-bottom: 10px;">共 ${totalChapters} 章</div>` + tocHtml
 }
 
 
@@ -323,7 +375,17 @@ function downloadEBook(secret, token, format = 'html') {
 
     document.querySelector('.download_btn').classList.add('disabled')
 
-    const query = new URLSearchParams({secret, token}).toString()
+    // 获取章节范围
+    const startChapter = document.querySelector('.chapter-start').value;
+    const endChapter = document.querySelector('.chapter-end').value;
+
+    const queryParams = {secret, token};
+    if (startChapter) queryParams.startChapter = startChapter;
+    if (endChapter) queryParams.endChapter = endChapter;
+     console.log("downloadEBook")
+    console.log(queryParams)
+
+    const query = new URLSearchParams(queryParams).toString()
     evtSource = new EventSource(new URL('/api/book/download?' + query, location.origin).toString())
     evtSource.addEventListener('close', () => {
         evtSource.close()

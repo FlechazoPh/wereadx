@@ -1,54 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>图书详情</title>
-    <link rel="stylesheet" href="lib/bootstrap.min.css">
-    <link rel="stylesheet" href="style/reset.css">
-    <link rel="stylesheet" href="style/common.css">
-    <link rel="stylesheet" href="style/detail.css">
-
-    <script src="lib/jszip.min.js" async></script>
-    <script src="lib/FileSaver.min.js" async></script>
-    <script type="module" src="js/detail.js"></script>
-</head>
-<body class="wr_whiteTheme">
-
-<div class="navBar">
-    <div class="navBar_inner">
-        <h2 class="navBar_title">书籍详情</h2>
-        <!-- <span style="color: red;font-size: 40px;background: green;"> 悄悄用，不要外传，使用频率不要太高，可能被封 -->
-        </span>
-        <div class="navBar_menu">
-            <a href="/" class="navBar_link">我的书架</a>
-            <!-- <span class="navBar_separator"></span>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>图书详情</title>
+        <link rel="stylesheet" href="lib/bootstrap.min.css">
+        <link rel="stylesheet" href="style/reset.css">
+        <link rel="stylesheet" href="style/common.css">
+        <link rel="stylesheet" href="style/detail.css">
+        <script src="lib/jszip.min.js" async></script>
+        <script src="lib/FileSaver.min.js" async></script>
+        <script type="module" src="js/detail.js"></script>
+    </head>
+    <body class="wr_whiteTheme">
+        <div class="navBar">
+            <div class="navBar_inner">
+                <h2 class="navBar_title">书籍详情</h2>
+                <!-- <span style="color: red;font-size: 40px;background: green;"> 悄悄用，不要外传，使用频率不要太高，可能被封 -->
+            </span>
+            <div class="navBar_menu">
+                <a href="/" class="navBar_link">我的书架</a>
+                <!-- <span class="navBar_separator"></span>
             <a href="/read.html" class="navBar_link">自动阅读</a>
             <span class="navBar_separator"></span>
             <a href="/setting.html" class="navBar_link">设置</a>
             <span class="navBar_separator"></span>
             <a href="https://github.com/champkeh/wereadx" target="_blank" class="navBar_link">GitHub</a> -->
+            </div>
         </div>
     </div>
-</div>
-
-<div class="page_container">
-    <div class="readerBookInfo">
-        <div class="readerBookInfo_head">
-            <div class="wr_bookCover bookInfo_cover">
-                <img src="" alt="书籍封面" class="cover_img">
-            </div>
-            <div class="bookInfo_right">
-                <div class="bookInfo_right_header">
-                    <div class="bookInfo_right_header_title">
-                        <h2 class="bookInfo_right_header_title_text">---</h2>
-                        <div class="bookInfo_author_container">
-                            <span class="bookInfo_author">作者：---</span>
-                        </div>
+    <div class="page_container">
+        <div class="readerBookInfo">
+            <div class="readerBookInfo_head">
+                <div class="wr_bookCover bookInfo_cover">
+                    <img src="" alt="书籍封面" class="cover_img">
+                </div>
+                <div class="bookInfo_right">
+                    <!-- 页数范围选择 -->
+                    <div class="chapter-range-selector" style="margin-top: 15px; display: flex; gap: 10px; align-items: center;">
+                        <label style="font-size: 14px; color: #666;">章节范围:</label>
+                        <input
+                            type="number"
+                            class="form-control chapter-start"
+                            placeholder="起始章节"
+                            min="1"
+                            style="width: 100px;"
+                        >
+                        <span style="color: #666;">-</span>
+                        <input
+                            type="number"
+                            class="form-control chapter-end"
+                            placeholder="结束章节"
+                            min="1"
+                            style="width: 100px;"
+                        >
+                        <button type="button" class="btn btn-sm btn-outline-secondary clear-range">全部</button>
                     </div>
-
-                    <div class="actions">
-                        <!-- <div class="btn-group" role="group">
+                    <div class="bookInfo_right_header">
+                        <div class="bookInfo_right_header_title">
+                            <h2 class="bookInfo_right_header_title_text">---</h2>
+                            <div class="bookInfo_author_container">
+                                <span class="bookInfo_author">作者：---</span>
+                            </div>
+                        </div>
+                        <div class="actions">
+                            <!-- <div class="btn-group" role="group">
                             <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                                 阅读
                             </button>
@@ -57,62 +73,81 @@
                                 <li><a class="dropdown-item begin_read" href="#">去微信读书阅读</a></li>
                             </ul>
                         </div> -->
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-dark dropdown-toggle download_btn" data-bs-toggle="dropdown" aria-expanded="false">
-                                下载
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item download_html_btn" href="#">HTML</a></li>
-                                <li><a class="dropdown-item download_epub_btn" href="#">EPUB</a></li>
-                                <li><a class="dropdown-item download_pdf_btn" href="#">PDF</a></li>
-                            </ul>
-                        </div>
-                         <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                下载控制
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item download_pause" href="#">暂停</a></li>
-                                <li><a class="dropdown-item download_recover" href="#">恢复</a></li>
-                            </ul>
+                            <div class="btn-group" role="group">
+                                <button
+                                    type="button"
+                                    class="btn btn-dark dropdown-toggle download_btn"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
+                                >
+                                    下载
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item download_html_btn" href="#">HTML</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item download_epub_btn" href="#">EPUB</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item download_pdf_btn" href="#">PDF</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="btn-group" role="group">
+                                <button
+                                    type="button"
+                                    class="btn btn-light dropdown-toggle"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
+                                >
+                                    下载控制
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item download_pause" href="#">暂停</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item download_recover" href="#">恢复</a>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
-                    
-                </div>
-                <div class="bookInfo_intro">简介：---</div>
-            </div>
-        </div>
-
-        <div class="introDialogWrap">
-            <div class="introDialog_content">
-                <h3 class="introDialog_content_title">详细信息</h3>
-                <div class="introDialog_content_pub_line">
-                    <span>出版社</span>
-                    <span class="publisher"></span></div>
-                <div class="introDialog_content_pub_line">
-                    <span>出版时间</span>
-                    <span class="publishTime"></span></div>
-                <div class="introDialog_content_pub_line">
-                    <span>原始格式</span>
-                    <span class="format"></span>
-                </div>
-                <div class="introDialog_content_pub_line">
-                    <span>其他可用格式</span>
-                    <span class="otherFormat"></span>
-                </div>
-                <div class="introDialog_content_pub_line">
-                    <span>ISBN</span>
-                    <span class="isbn"></span>
+                    <div class="bookInfo_intro">简介：---</div>
                 </div>
             </div>
-            <div class="introDialog_content">
-                <h3 class="introDialog_content_title">目录</h3>
-                <nav id="toc" role="doc-toc"></nav>
+            <div class="introDialogWrap">
+                <div class="introDialog_content">
+                    <h3 class="introDialog_content_title">详细信息</h3>
+                    <div class="introDialog_content_pub_line">
+                        <span>出版社</span>
+                        <span class="publisher"></span>
+                    </div>
+                    <div class="introDialog_content_pub_line">
+                        <span>出版时间</span>
+                        <span class="publishTime"></span>
+                    </div>
+                    <div class="introDialog_content_pub_line">
+                        <span>原始格式</span>
+                        <span class="format"></span>
+                    </div>
+                    <div class="introDialog_content_pub_line">
+                        <span>其他可用格式</span>
+                        <span class="otherFormat"></span>
+                    </div>
+                    <div class="introDialog_content_pub_line">
+                        <span>ISBN</span>
+                        <span class="isbn"></span>
+                    </div>
+                </div>
+                <div class="introDialog_content">
+                    <h3 class="introDialog_content_title">目录</h3>
+                    <nav id="toc" role="doc-toc"></nav>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 </body>
 </html>

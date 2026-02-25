@@ -30,13 +30,14 @@ export function base64Decode(input: string): string {
     // 清理字符串
     const cleaned = input.replace(/\s+/g, ''); // 去除空格
     if (!/^[A-Za-z0-9+/]+={0,2}$/.test(cleaned)) {
-      console.log(input);
+      console.error("Invalid Base64 string format:", input.substring(0, 50));
       throw new Error("Invalid Base64 string");
     }
     return new TextDecoder().decode(base64.decode(cleaned)); // 使用 cleaned 进行解码
   } catch (error) {
     console.error("Base64 decode error:", error);
-    return ""; // 返回空字符串以保持正常执行
+    // 抛出错误而不是返回空字符串，这样可以触发重试机制
+    throw error;
   }
 }
 

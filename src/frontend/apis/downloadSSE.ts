@@ -196,27 +196,27 @@ async function safeDownloadChapter(bookInfo, chapter, cookie, browserInfo) {
 /**
  * 下载
  */
-export function downloadSSE(bookId: string, credential: Credential): Response {
+export function downloadSSE(bookId: string, credential: Credential, startChapter?: number, endChapter?: number): Response {
     let isClosed = false;
 
     const body = new ReadableStream({
         start: async (controller) => {
             try {
                 const cookie = credentialUtil.getCookieByCredential(credential);
-                
+
                 // 生成一个随机浏览器信息，整个会话使用相同的浏览器配置
                 const browserInfo = generateRandomBrowserInfo();
                 console.log(`使用浏览器信息: ${browserInfo.userAgent}`);
 
                 let bookInfo, chapterInfos;
-                
+
                 try {
                     // 首先获取书籍信息
                     bookInfo = await web_book_info(bookId, cookie);
-                    
+
                     // 为下一个请求添加随机延迟，模拟真实用户浏览网页的时间
                     await randomDelay(1000, 3000);
-                    
+
                     // 然后获取章节信息
                     chapterInfos = await web_book_chapterInfos([bookId], cookie);
                 } catch (error) {
@@ -226,7 +226,18 @@ export function downloadSSE(bookId: string, credential: Credential): Response {
                 }
 
                 // todo: 检查是否获取章节失败
-                const chapters = chapterInfos.data[0].updated;
+                let chapters = chapterInfos.data[0].updated;
+
+                // 根据章节范围过滤章节
+                if (startChapter !== undefined || endChapter !== undefined) {
+                    const start = startChapter !== undefined ? startChapter - 1 : 0; // 转换为0索引
+                    const end = endChapter !== undefined ? endChapter : chapters.length;
+                    chapters = chapters.filter((chapter, index) => {
+                        const chapterNum = index + 1; // 章节编号从1开始
+                        return chapterNum >= (startChapter || 1) && chapterNum <= (endChapter || chapters.length);
+                    });
+                    console.log(`下载章节范围: ${startChapter || 1} - ${endChapter || chapterInfos.data[0].updated.length}, 共 ${chapters.length} 章`);
+                }
 
                 // Windows 环境下通过 `import.meta.resolve()` 函数获取到的路径为 'file:///C:/Users/...'，而 `Deno.readTextFileSync()` 函数
                 // 在读取 '/C:/Users/...' 文件会出错，需要去掉开头的 '/' 字符，变为 'C:/Users/...' 才可以正确读取。

@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "Allalow": [
+      "Bash(dir /s /b D:SourceCodewebfrontwereadsrcfrontendwww*.html)"
+    ]
+  }
+}

@@ -3,7 +3,7 @@ import {web_book_chapterInfos, web_book_info} from "../../apis/web/book.ts";
 import {downloadSSE} from "./downloadSSE.ts";
 import {checkDownloadCount, newDownloadSecret, useSecret,} from "../../kv/download.ts";
 import {MAX_DOWNLOAD_COUNT_PER_MONTH} from "../../config.ts";
-import {apiCallWithRetry, ParamCheckEntity, ResponseCode} from "./common.ts";
+import {apiCallWithRetry, ParamCheckEntity, ResponseCode,getUrlParam} from "./common.ts";
 import {calcHash, jsonResponse} from "../../utils/index.ts";
 import type {Credential} from "../../kv/credential.ts";
 import * as credentialUtil from "../../kv/credential.ts";
@@ -83,6 +83,7 @@ export async function bookChapters(req: Request) {
  * @param req
  */
 export async function bookDownload(req: Request) {
+    
     const params: ParamCheckEntity[] = [
         {
             name: "token",
@@ -98,10 +99,14 @@ export async function bookDownload(req: Request) {
         },
     ];
 
-    return await apiCallWithRetry(req, params, async ({secret}: Record<string, string>, credential: Credential) => {
+    return await apiCallWithRetry(req, params, async ({secret, startChapter, endChapter}: Record<string, string>, credential: Credential) => {
         const [ok, bookId] = await useSecret(credential, secret);
         if (ok) {
-            return downloadSSE(bookId, credential);
+            const start = Number(getUrlParam(req.url, 'startChapter', undefined));
+            const end = Number(getUrlParam(req.url, 'endChapter', undefined));
+            // 解析章节范围参数
+            console.log('startChapter',start, 'endChapter',end);
+            return downloadSSE(bookId, credential, start, end);
         } else {
             return jsonResponse({code: ResponseCode.ParamError, msg: 'secret无效'})
         }
