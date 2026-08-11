@@ -5,7 +5,7 @@ import { base64, crypto } from "../deps.ts";
  * @param raw
  */
 export function md5(raw: string): string {
-  const buf = new TextEncoder().encode(raw).buffer;
+  const buf = new TextEncoder().encode(raw);
   return crypto.toHashString(crypto.crypto.subtle.digestSync("MD5", buf));
 }
 
@@ -14,7 +14,7 @@ export function md5(raw: string): string {
  * @param raw
  */
 export function sha256(raw: string): string {
-  const buf = new TextEncoder().encode(raw).buffer;
+  const buf = new TextEncoder().encode(raw);
   return crypto.toHashString(crypto.crypto.subtle.digestSync("SHA-256", buf));
 }
 
@@ -28,20 +28,18 @@ export function sha256(raw: string): string {
 export function base64Decode(input: string): string {
   try {
     // 清理字符串
-    const cleaned = input.replace(/\s+/g, ''); // 去除空格
+    const cleaned = input.replace(/\s+/g, ""); // 去除空格
     if (!/^[A-Za-z0-9+/]+={0,2}$/.test(cleaned)) {
       console.error("Invalid Base64 string format:", input.substring(0, 50));
       throw new Error("Invalid Base64 string");
     }
-    return new TextDecoder().decode(base64.decode(cleaned)); // 使用 cleaned 进行解码
+    return new TextDecoder().decode(base64.decode(cleaned));
   } catch (error) {
     console.error("Base64 decode error:", error);
     // 抛出错误而不是返回空字符串，这样可以触发重试机制
     throw error;
   }
 }
-
-
 
 /**
  * base64 编码
@@ -59,7 +57,6 @@ export async function aes() {
     true,
     ["encrypt", "decrypt"],
   );
-  console.log(key);
   const jwk = await crypto.crypto.subtle.exportKey("jwk", key);
 
   const k = await crypto.crypto.subtle.importKey("jwk", jwk, "AES-CBC", true, [

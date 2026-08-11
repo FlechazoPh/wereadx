@@ -187,6 +187,10 @@ export function jsonResponse(data: unknown) {
   );
 }
 
+export function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 /**
  * 生成一个随机整数
  * @param min 最小值(包含)

@@ -100,7 +100,7 @@ export async function updateReadingTask(credential: Credential, seconds = 0) {
     task.seconds += seconds;
   } else {
     console.warn(`task更新时间:${date}, 上次更新时间:${lastUpdateDate}`);
-    console.warn(credential, seconds);
+    console.warn(`vid: ${credential.vid}, seconds: ${seconds}`);
   }
   task.updatedAt = Date.now();
   await kv.set(["task", "read", credential.vid], task);

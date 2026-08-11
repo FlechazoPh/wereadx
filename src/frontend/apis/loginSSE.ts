@@ -3,84 +3,81 @@ import {
   web_login_getinfo,
   web_login_getuid,
   web_login_session_init,
-  web_login_weblogin,
 } from "../../apis/web/login.ts";
+import { errorMessage } from "../../utils/index.ts";
 import * as credentialUtil from "../../kv/credential.ts";
-import * as taskManager from "../../kv/task.ts"
-import {getUlid} from "../../utils/index.ts";
-import {sendEvent} from "./common.ts";
-import {web_user} from "../../apis/web/user.ts";
-import {Credential} from "../../kv/credential.ts";
-
+import * as taskManager from "../../kv/task.ts";
+import { getUlid } from "../../utils/index.ts";
+import { sendEvent } from "./common.ts";
+import { web_user } from "../../apis/web/user.ts";
+import { Credential } from "../../kv/credential.ts";
 
 /**
  * 登录
  * @param _
  */
 export function loginSSE(_: Request): Response {
-    let isClosed = false;
-    const body = new ReadableStream({
-        start: async (controller) => {
-            try {
-                const {uid} = await web_login_getuid();
-                const url = web_confirm(uid);
-                console.log("url: ", url);
-                sendEvent(isClosed, controller, "qrcode", url);
+  let isClosed = false;
+  const body = new ReadableStream({
+    start: async (controller) => {
+      try {
+        const { uid } = await web_login_getuid();
+        const url = web_confirm(uid);
+        sendEvent(isClosed, controller, "qrcode", url);
 
-                const info = await web_login_getinfo(uid);
-                console.log("info: ", info);
-                if (isClosed) {
-                    return
-                }
-                if (info.scan === 0) {
-                    // 超时未扫码，前端二维码过期
-                    sendEvent(isClosed, controller, "expired");
-                    return;
-                }
+        const info = await web_login_getinfo(uid);
+        if (isClosed) {
+          return;
+        }
+        if (info.scan === 0) {
+          // 超时未扫码，前端二维码过期
+          sendEvent(isClosed, controller, "expired");
+          return;
+        }
 
-                // const auth = await web_login_weblogin(info);
-                // console.log("auth: ", auth);
-                const resp = await web_login_session_init(info);
-                console.log("resp: ", resp);
-                if (resp.success === 1) {
-                    // 登录成功，生成一个随机数作为前端的 token
-                    const token = getUlid();
-                    // 获取用户名
-                    // const userResp = await web_user(auth.vid, `wr_vid=${auth.vid};wr_skey=${auth.accessToken};wr_rt=${auth.refreshToken};`)
-                    const userResp = await web_user(info.vid, `wr_vid=${info.vid};wr_skey=${info.skey};wr_rt=${info.code};`)
-                    const credential: Credential = {
-                        token: token,
-                        vid: Number(info.vid),
-                        skey: info.skey,
-                        rt: info.code,
-                        updatedAt: Date.now(),
-                        name: userResp.name || 'unknown',
-                    }
-                    await credentialUtil.update(credential)
-                    sendEvent(isClosed, controller, "token", token);
+        const resp = await web_login_session_init(info);
+        if (resp.success === 1) {
+          // 登录成功，生成一个随机数作为前端的 token
+          const token = getUlid();
+          // 获取用户名
+          // const userResp = await web_user(auth.vid, `wr_vid=${auth.vid};wr_skey=${auth.accessToken};wr_rt=${auth.refreshToken};`)
+          const userResp = await web_user(
+            info.vid,
+            `wr_vid=${info.vid};wr_skey=${info.skey};wr_rt=${info.code};`,
+          );
+          const credential: Credential = {
+            token: token,
+            vid: Number(info.vid),
+            skey: info.skey,
+            rt: info.code,
+            updatedAt: Date.now(),
+            name: userResp.name || "unknown",
+          };
+          await credentialUtil.update(credential);
+          sendEvent(isClosed, controller, "token", token);
 
-                    // 更新阅读任务中的token
-                    await taskManager.updateTaskToken(credential)
-                } else {
-                    console.warn("会话初始化失败: ", resp);
-                }
-            } catch (e) {
-                console.error(e);
-                sendEvent(isClosed, controller, "error", e.message);
-            } finally {
-                sendEvent(isClosed, controller, "close");
-            }
-        },
-        cancel(reason) {
-            console.debug('loginSSE: ', reason);
-            isClosed = true
-        },
-    });
+          // 更新阅读任务中的token
+          await taskManager.updateTaskToken(credential);
+        } else {
+          console.warn("会话初始化失败: ", resp.success);
+        }
+      } catch (e) {
+        console.error(e);
+        sendEvent(isClosed, controller, "error", errorMessage(e));
+      } finally {
+        sendEvent(isClosed, controller, "close");
+      }
+    },
+    cancel(reason) {
+      console.debug("loginSSE: ", reason);
+      isClosed = true;
+    },
+  });
 
-    return new Response(body, {
-        headers: {
-            "Content-Type": "text/event-stream",
-            "Access-Control-Allow-Origin": "*",
-        },
-    });
+  return new Response(body, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Access-Control-Allow-Origin": "*",
+    },
+  });
 }

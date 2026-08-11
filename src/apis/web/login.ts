@@ -1,5 +1,5 @@
-import {get, postJSON} from "../../utils/request.ts";
-import {checkErrCode} from "../err-code.ts";
+import { get, postJSON } from "../../utils/request.ts";
+import { checkErrCode } from "../err-code.ts";
 
 /**
  * 获取uid
@@ -32,7 +32,9 @@ export async function web_login_getinfo(uid: string) {
  * 使用扫码信息进行登录
  * @param info
  */
-export async function web_login_weblogin(info: Record<string, any> = {}) {
+export async function web_login_weblogin(
+  info: Record<string, string | number> = {},
+) {
   delete info.redirect_uri;
   delete info.expireMode;
   delete info.pf;
@@ -46,7 +48,9 @@ export async function web_login_weblogin(info: Record<string, any> = {}) {
  * 初始化会话
  * @param info
  */
-export async function web_login_session_init(info: Record<string, any> = {}) {
+export async function web_login_session_init(
+  info: Record<string, string | number> = {},
+) {
   const params = {
     vid: info.vid,
     pf: 0,
@@ -72,7 +76,7 @@ export async function web_login_renewal(url: string, cookie = "") {
     cookie,
   });
 
-  await checkErrCode(resp, cookie)
+  await checkErrCode(resp, cookie);
 
   const data = await resp.json();
   if (data.succ === 1) {
@@ -95,7 +99,7 @@ export async function web_login_renewal(url: string, cookie = "") {
     // { errCode: -12013, errMsg: "微信登录授权已过期，继续购买需跳转到微信重新登录" }
     // { errCode: -2013, errLog: "C6LyBKI", errMsg: "鉴权失败" }
     if (data.errCode !== -12013) {
-      console.warn('/web/login/renewal接口失败', data, cookie)
+      console.warn("/web/login/renewal接口失败", data.errCode);
     }
     throw Error(data.errMsg);
   }
@@ -105,7 +109,9 @@ export async function web_login_renewal(url: string, cookie = "") {
  * 通知后台前端已登录
  */
 export async function web_login_notify(cookie = "") {
-  const resp = await get("https://weread.qq.com/web/login/notify", {}, {cookie})
-  await checkErrCode(resp, cookie)
-  return resp.json()
+  const resp = await get("https://weread.qq.com/web/login/notify", {}, {
+    cookie,
+  });
+  await checkErrCode(resp, cookie);
+  return resp.json();
 }

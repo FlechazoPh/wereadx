@@ -1,4 +1,5 @@
 import sql from "./db.ts";
+import { errorMessage } from "../utils/index.ts";
 
 /**
  * 创建 download 表
@@ -34,7 +35,7 @@ export async function insertDownloadRecords(
       await sql`insert into download ${sql(record)}`;
     } catch (e) {
       if (
-        e.message ===
+        errorMessage(e) ===
           'duplicate key value violates unique constraint "download_id_pkey"'
       ) {
         // 重复插入

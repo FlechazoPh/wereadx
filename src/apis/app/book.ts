@@ -62,7 +62,6 @@ export async function book_chapter_download(vid: number | string, skey: string) 
         "User-Agent": UserAgentForApp,
         v: '7.4.2.23'
     })
-    console.log(resp.headers)
     await checkErrCode(resp, vid)
     return resp.text()
 }

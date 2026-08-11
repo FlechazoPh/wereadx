@@ -1,5 +1,5 @@
 import { get, postJSON } from "../../utils/request.ts";
-import {checkErrCode} from "../err-code.ts";
+import { checkErrCode } from "../err-code.ts";
 
 /**
  * 获取书架上的书
@@ -9,13 +9,13 @@ import {checkErrCode} from "../err-code.ts";
  * @param cookie
  */
 export async function web_shelf_sync(
-  query: Record<string, any> = {},
+  query: Record<string, string | number> = {},
   cookie = "",
 ) {
   const resp = await get("https://weread.qq.com/web/shelf/sync", query, {
     cookie: cookie,
   });
-  await checkErrCode(resp, cookie)
+  await checkErrCode(resp, cookie);
   return resp.json();
 }
 
@@ -30,7 +30,7 @@ export async function web_shelf_syncBook(bookIds: string[] = [], cookie = "") {
   }, {
     cookie: cookie,
   });
-  await checkErrCode(resp, cookie)
+  await checkErrCode(resp, cookie);
   return resp.json();
 }
 
@@ -41,12 +41,12 @@ export async function web_shelf_syncBook(bookIds: string[] = [], cookie = "") {
  */
 export async function web_shelf_bookIds(bookIds: string[] = [], cookie = "") {
   const resp = await get("https://weread.qq.com/web/shelf/bookIds", {
-    bookIds: bookIds.join(','),
+    bookIds: bookIds.join(","),
   }, {
     cookie: cookie,
-  })
-  await checkErrCode(resp, cookie)
-  return resp.json()
+  });
+  await checkErrCode(resp, cookie);
+  return resp.json();
 }
 
 /**
@@ -54,14 +54,17 @@ export async function web_shelf_bookIds(bookIds: string[] = [], cookie = "") {
  * @param bookIds
  * @param cookie
  */
-export async function web_shelf_addToShelf(bookIds: string[] = [], cookie = "") {
+export async function web_shelf_addToShelf(
+  bookIds: string[] = [],
+  cookie = "",
+) {
   const resp = await postJSON("https://weread.qq.com/mp/shelf/addToShelf", {
     bookIds: bookIds,
   }, {
     cookie: cookie,
-  })
-  await checkErrCode(resp, cookie)
-  return resp.json()
+  });
+  await checkErrCode(resp, cookie);
+  return resp.json();
 }
 
 /**
@@ -74,7 +77,7 @@ export async function web_shelf_add(bookIds: string[] = [], cookie = "") {
     bookIds,
   }, {
     cookie,
-  })
-  await checkErrCode(resp, cookie)
-  return resp.json()
+  });
+  await checkErrCode(resp, cookie);
+  return resp.json();
 }

@@ -2,9 +2,8 @@ import * as credentialUtil from "../kv/credential.ts";
 import { exchangeAllAward } from "../apis/app/weekly.ts";
 import { jsonResponse } from "../utils/index.ts";
 import { ResponseCode } from "../frontend/apis/common.ts";
-import { executeApiCallWithRetry } from "./common.ts";
+import { executeApiCallWithRetry, isCronRequestAuthorized } from "./common.ts";
 import type { Credential } from "../kv/credential.ts";
-import runtime from "../runtime.ts";
 
 /**
  * 执行兑换体验卡任务
@@ -12,12 +11,13 @@ import runtime from "../runtime.ts";
  * todo: 等 deno 原生支持 cron 后，可以切换为 deno cron
  */
 export async function runExchangeTask(_: Request) {
-  const key = new URL(_.url).searchParams.get("key");
-  if (key !== runtime.cronKey) {
-    console.warn(`外部触发 cron::runExchangeTask 任务，已忽略(${_.url} <- ${_.headers.get('referer')})`)
-    return jsonResponse({code: ResponseCode.Error, msg: '非正常触发，已忽略'})
+  if (!isCronRequestAuthorized(_)) {
+    console.warn("未授权触发 cron::runExchangeTask，已忽略");
+    return jsonResponse({
+      code: ResponseCode.Error,
+      msg: "非正常触发，已忽略",
+    });
   }
-
 
   console.debug("触发 cron::runExchangeTask 任务");
 

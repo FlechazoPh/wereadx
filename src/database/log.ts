@@ -1,4 +1,5 @@
 import sql from "./db.ts";
+import { errorMessage } from "../utils/index.ts";
 
 /**
  * 创建 log 表
@@ -43,7 +44,7 @@ export async function insertLogRecords(records: LogRecord[]): Promise<void> {
       await sql`insert into log ${sql(record)}`;
     } catch (e) {
       if (
-        e.message ===
+        errorMessage(e) ===
           'duplicate key value violates unique constraint "log_hash_key"'
       ) {
         // 重复插入

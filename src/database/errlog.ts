@@ -1,4 +1,5 @@
 import sql from "./db.ts";
+import { errorMessage } from "../utils/index.ts";
 
 /**
  * 创建 errlog 表
@@ -36,7 +37,7 @@ export async function insertErrLogRecords(
       await sql`insert into errlog ${sql(record)}`;
     } catch (e) {
       if (
-        e.message ===
+        errorMessage(e) ===
           'duplicate key value violates unique constraint "errlog_id_pkey"'
       ) {
         // 重复插入

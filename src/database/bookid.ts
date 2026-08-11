@@ -1,5 +1,6 @@
 import sql from "./db.ts";
 import { calcHash } from "../utils/index.ts";
+import { errorMessage } from "../utils/index.ts";
 
 /**
  * 创建 bookid 表
@@ -30,7 +31,7 @@ export async function insertBookIds(bookIds: string[]): Promise<void> {
       console.log(++count);
     } catch (e) {
       if (
-        e.message ===
+        errorMessage(e) ===
           'duplicate key value violates unique constraint "bookid_pkey"'
       ) {
         // 重复插入

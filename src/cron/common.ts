@@ -4,6 +4,13 @@ import * as credentialUtil from "../kv/credential.ts";
 import { Credential } from "../kv/credential.ts";
 import { ApiCallResponse, ResponseCode } from "../frontend/apis/common.ts";
 import { web_login_renewal } from "../apis/web/login.ts";
+import runtime from "../runtime.ts";
+import { errorMessage } from "../utils/index.ts";
+
+export function isCronRequestAuthorized(req: Request): boolean {
+  return runtime.cronKey.length > 0 &&
+    req.headers.get("x-cron-key") === runtime.cronKey;
+}
 
 /**
  * 带有重试功能的 api 调用
@@ -58,7 +65,7 @@ export async function executeApiCallWithRetry(
       } catch (e) {
         console.error(e);
         // 可能是鉴权失败，需要重新登录
-        return { code: ResponseCode.CredentialError, msg: e.message };
+        return { code: ResponseCode.CredentialError, msg: errorMessage(e) };
       }
     } else if (resp && resp.needRepeat) {
       // 重新调用原始接口
