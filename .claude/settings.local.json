@@ -1,5 +1,10 @@
 {
   "permissions": {
+    "allow": [
+      "Bash(rm -rf node_modules)",
+      "Bash(deno install *)",
+      "Bash(timeout 5 deno run -A --unstable-kv src/server.ts local)"
+    ],
     "Allalow": [
       "Bash(dir /s /b D:SourceCodewebfrontwereadsrcfrontendwww*.html)"
     ],
