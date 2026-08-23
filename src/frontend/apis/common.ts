@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import * as credentialUtil from "../../kv/credential.ts";
 import { errorMessage, jsonResponse } from "../../utils/index.ts";
-import { web_login_renewal } from "../../apis/web/login.ts";
+import { renewCredential } from "../../apis/web/login.ts";
 import type { Credential } from "../../kv/credential.ts";
 
 export enum ResponseCode {
@@ -99,8 +99,6 @@ export async function apiCallWithRetry(
 
   async function executor(retry: number) {
     const credential = await credentialUtil.getByToken(token);
-    const cookie = credentialUtil.getCookieByCredential(credential);
-
     const resp = await apiCall(result as Record<string, string>, credential);
     if (resp instanceof Response) {
       return resp;
@@ -116,15 +114,10 @@ export async function apiCallWithRetry(
     ) {
       // skey过期，重新刷新
       try {
-        const credentialInfo = await web_login_renewal(
+        await renewCredential(
+          token,
           "/web/shelf/sync",
-          cookie,
         );
-        const { accessToken, refreshToken } = credentialInfo;
-        credential.skey = accessToken;
-        credential.rt = refreshToken;
-        credential.updatedAt = Date.now();
-        await credentialUtil.update(credential);
 
         // 重新调用原始接口
         return executor(--retry);

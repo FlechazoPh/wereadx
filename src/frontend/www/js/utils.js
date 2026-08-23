@@ -136,7 +136,15 @@ export function convertChaptersToToc(chapters) {
     const toc = [];
     const stack = [];
 
-    for (const chapter of chapters) {
+    const expandedChapters = chapters.flatMap(({anchors, ...chapter}) => {
+        chapter.level ||= 1;
+        const chapterAnchors = Array.isArray(anchors) ? anchors : [];
+        return [chapter, ...chapterAnchors
+            .filter(anchor => anchor.title !== chapter.title || anchor.level !== chapter.level)
+            .map(anchor => ({...chapter, ...anchor, isAnchor: true}))];
+    });
+
+    for (const chapter of expandedChapters) {
         const { level } = chapter;
 
         while (stack.length >= level) {

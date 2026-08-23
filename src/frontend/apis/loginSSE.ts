@@ -37,19 +37,22 @@ export function loginSSE(_: Request): Response {
 
         const resp = await web_login_session_init(info);
         if (resp.success === 1) {
+          const vid = Number(resp.vid ?? info.vid);
+          const skey = resp.accessToken ?? info.skey;
+          const rt = resp.refreshToken ?? info.code;
+          if (!skey || !rt) throw new Error("登录成功但未获取到完整凭证");
+
           // 登录成功，生成一个随机数作为前端的 token
           const token = getUlid();
-          // 获取用户名
-          // const userResp = await web_user(auth.vid, `wr_vid=${auth.vid};wr_skey=${auth.accessToken};wr_rt=${auth.refreshToken};`)
           const userResp = await web_user(
-            info.vid,
-            `wr_vid=${info.vid};wr_skey=${info.skey};wr_rt=${info.code};`,
+            vid,
+            `wr_vid=${vid};wr_skey=${skey};wr_rt=${rt};`,
           );
           const credential: Credential = {
             token: token,
-            vid: Number(info.vid),
-            skey: info.skey,
-            rt: info.code,
+            vid,
+            skey,
+            rt,
             updatedAt: Date.now(),
             name: userResp.name || "unknown",
           };

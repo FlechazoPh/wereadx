@@ -1,5 +1,27 @@
 import { get, postJSON } from "../../utils/request.ts";
 import { checkErrCode } from "../err-code.ts";
+import * as credentialUtil from "../../kv/credential.ts";
+import type { Credential } from "../../kv/credential.ts";
+
+// ponytail: single-process lock; use a KV lease if multiple replicas share an account.
+const credentialRenewals = new Map<string, Promise<Credential>>();
+
+export function getCredentialCookies(headers: Headers) {
+  return headers.getSetCookie().reduce(
+    (entry: Record<string, string>, cookie) => {
+      const item = cookie.split(";", 1)[0];
+      const separator = item.indexOf("=");
+      if (separator < 0) return entry;
+      const name = item.slice(0, separator);
+      const value = item.slice(separator + 1);
+      if (name === "wr_vid") entry.vid = value;
+      else if (name === "wr_skey") entry.accessToken = value;
+      else if (name === "wr_rt") entry.refreshToken = value;
+      return entry;
+    },
+    {},
+  );
+}
 
 /**
  * 获取uid
@@ -54,14 +76,14 @@ export async function web_login_session_init(
   const params = {
     vid: info.vid,
     pf: 0,
-    skey: info.skey,
-    rt: info.code,
+    skey: info.accessToken ?? info.skey,
+    rt: info.refreshToken ?? info.code,
   };
   const resp = await postJSON(
     "https://weread.qq.com/web/login/session/init",
     params,
   );
-  return resp.json();
+  return { ...await resp.json(), ...getCredentialCookies(resp.headers) };
 }
 
 /**
@@ -72,6 +94,7 @@ export async function web_login_session_init(
 export async function web_login_renewal(url: string, cookie = "") {
   const resp = await postJSON("https://weread.qq.com/web/login/renewal", {
     rq: encodeURIComponent(url),
+    ql: false,
   }, {
     cookie,
   });
@@ -80,29 +103,46 @@ export async function web_login_renewal(url: string, cookie = "") {
 
   const data = await resp.json();
   if (data.succ === 1) {
-    return resp.headers.getSetCookie().reduce(
-      (entry: Record<string, string>, cookie) => {
-        const item = cookie.split(";")[0];
-        const [name, value] = item.split("=");
-        if (name === "wr_vid") {
-          entry.vid = value;
-        } else if (name === "wr_skey") {
-          entry.accessToken = value;
-        } else if (name === "wr_rt") {
-          entry.refreshToken = value;
-        }
-        return entry;
-      },
-      {},
-    );
+    const credential = getCredentialCookies(resp.headers);
+    if (!credential.accessToken) {
+      throw new Error("续期成功但未返回 wr_skey");
+    }
+    return credential;
   } else {
     // { errCode: -12013, errMsg: "微信登录授权已过期，继续购买需跳转到微信重新登录" }
     // { errCode: -2013, errLog: "C6LyBKI", errMsg: "鉴权失败" }
     if (data.errCode !== -12013) {
       console.warn("/web/login/renewal接口失败", data.errCode);
     }
-    throw Error(data.errMsg);
+    const error = new Error(data.errMsg);
+    Object.assign(error, data);
+    throw error;
   }
+}
+
+export function renewCredential(token: string, url: string) {
+  const pending = credentialRenewals.get(token);
+  if (pending) return pending;
+
+  const renewal = (async () => {
+    const credential = await credentialUtil.getByToken(token);
+    if (!credential.token || !credential.rt) {
+      throw new Error("登录凭证无效，请重新登录");
+    }
+
+    const updated = await web_login_renewal(
+      url,
+      credentialUtil.getCookieByCredential(credential),
+    );
+    credential.skey = updated.accessToken ?? credential.skey;
+    credential.rt = updated.refreshToken ?? credential.rt;
+    credential.updatedAt = Date.now();
+    await credentialUtil.update(credential);
+    return credential;
+  })().finally(() => credentialRenewals.delete(token));
+
+  credentialRenewals.set(token, renewal);
+  return renewal;
 }
 
 /**

@@ -12,7 +12,7 @@ import { ResponseCode } from "../frontend/apis/common.ts";
 import { web_book_read } from "../apis/web/book.ts";
 import { friend_ranking } from "../apis/app/friend.ts";
 import { ErrCode } from "../apis/err-code.ts";
-import { web_login_renewal } from "../apis/web/login.ts";
+import { renewCredential } from "../apis/web/login.ts";
 import { pauseReadTask } from "../kv/task.ts";
 import { isCronRequestAuthorized } from "./common.ts";
 
@@ -214,16 +214,13 @@ async function getReadingTime(credential: Credential): Promise<number> {
  */
 export async function refreshCookie(credential: Credential) {
   try {
-    const oldCookie = credentialUtil.getCookieByCredential(credential);
-    const credentialInfo = await web_login_renewal(
-      "/web/shelf/sync",
-      oldCookie,
+    Object.assign(
+      credential,
+      await renewCredential(
+        credential.token,
+        "/web/shelf/sync",
+      ),
     );
-    const { accessToken, refreshToken } = credentialInfo;
-    credential.skey = accessToken;
-    credential.rt = refreshToken;
-    credential.updatedAt = Date.now();
-    await credentialUtil.update(credential);
     return true;
   } catch (e) {
     if (

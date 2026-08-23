@@ -140,6 +140,9 @@
       "tarball": "https://registry.npmmirror.com/xss/-/xss-1.0.14.tgz"
     }
   },
+  "redirects": {
+    "https://esm.sh/uuid@latest": "https://esm.sh/uuid@14.0.2"
+  },
   "remote": {
     "https://deno.land/std@0.132.0/_deno_unstable.ts": "23a1a36928f1b6d3b0170aaa67de09af12aa998525f608ff7331b9fb364cbde6",
     "https://deno.land/std@0.132.0/_util/assert.ts": "e94f2eb37cebd7f199952e242c77654e43333c1ac4c5c700e929ea3aa5489f74",
@@ -651,6 +654,8 @@
     "https://deno.land/x/postgresjs@v3.3.5/src/result.js": "001ff5e0c8d634674f483d07fbcd620a797e3101f842d6c20ca3ace936260465",
     "https://deno.land/x/postgresjs@v3.3.5/src/subscribe.js": "47d7edb9e8be1d7912338371d3310fd70e819dc00d1be5dd0c2ac8ad3f18293b",
     "https://deno.land/x/postgresjs@v3.3.5/src/types.js": "14088a11a1b76ca3d3b6b78086544bfe2142a4352663639449a36712b22eab56",
-    "https://deno.land/x/ulid@v0.3.0/mod.ts": "f7ff065b66abd485051fc68af23becef6ccc7e81f7774d7fcfd894a4b2da1984"
+    "https://deno.land/x/ulid@v0.3.0/mod.ts": "f7ff065b66abd485051fc68af23becef6ccc7e81f7774d7fcfd894a4b2da1984",
+    "https://esm.sh/uuid@14.0.2": "f3d7bea055f763b8221de8bdd957aa37cfa7a87d0ccc70b69d4dd910a143994d",
+    "https://esm.sh/uuid@14.0.2/denonext/uuid.mjs": "b10d50d88b546ee17bb704a7f9edf91d1a1449e7133f59fd88c3c9a93fc7052b"
   }
 }

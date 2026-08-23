@@ -9,6 +9,7 @@ import { incrementDownloadCount } from "../../kv/download.ts";
 import { checkParams, sendEvent } from "./common.ts";
 import type { Credential } from "../../kv/credential.ts";
 import { ErrCode } from "../../apis/err-code.ts";
+import { renewCredential } from "../../apis/web/login.ts";
 
 import { jsonResponse } from "../../utils/index.ts";
 import { ResponseCode } from "./common.ts";
@@ -61,7 +62,7 @@ function createHumanReadingProfile() {
 async function safeDownloadChapter(
   bookInfo: BookInfo,
   chapter: ChapterInfo,
-  cookie: string,
+  credential: Credential,
 ): Promise<[string, string, string]> {
   const maxRetries = 3;
   let attempts = 0;
@@ -72,17 +73,25 @@ async function safeDownloadChapter(
 
   while (attempts < maxRetries) {
     try {
+      if (Date.now() - credential.updatedAt >= 1000 * (5400 - 30)) {
+        await refreshDownloadCredential(credential);
+      }
+
       // 使用我们的封装函数而不是直接调用API
       const [title, html, style] = await web_book_chapter_e(
         bookInfo,
         chapter,
-        cookie,
+        credentialUtil.getCookieByCredential(credential),
       );
 
       return [title, html, style];
     } catch (error) {
       attempts++;
       lastError = error;
+
+      if (isAuthenticationError(error)) {
+        await refreshDownloadCredential(credential);
+      }
       console.warn(
         `下载章节 "${chapter.title}" 失败 (${attempts}/${maxRetries}): ${
           errorMessage(error)
@@ -109,7 +118,29 @@ async function safeDownloadChapter(
 
 function isHighFrequencyError(error: unknown): boolean {
   return typeof error === "object" && error !== null &&
-    "errCode" in error && error.errCode === ErrCode.HighFrequency;
+    (("errCode" in error && error.errCode === ErrCode.HighFrequency) ||
+      ("errcode" in error && error.errcode === ErrCode.HighFrequency));
+}
+
+function isAuthenticationError(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) return false;
+  const code = "errCode" in error
+    ? error.errCode
+    : "errcode" in error
+    ? error.errcode
+    : undefined;
+  return code === ErrCode.SessionTimeout ||
+    code === ErrCode.AuthenticationFailed;
+}
+
+async function refreshDownloadCredential(credential: Credential) {
+  Object.assign(
+    credential,
+    await renewCredential(
+      credential.token,
+      "/web/book/chapter/e_2",
+    ),
+  );
 }
 
 interface ChapterInfoResponse {
@@ -130,20 +161,28 @@ export function downloadSSE(
   const body = new ReadableStream({
     start: async (controller) => {
       try {
-        const cookie = credentialUtil.getCookieByCredential(credential);
+        if (Date.now() - credential.updatedAt >= 1000 * (5400 - 30)) {
+          await refreshDownloadCredential(credential);
+        }
 
         let bookInfo: BookInfo;
         let chapterInfos: ChapterInfoResponse;
 
         try {
           // 首先获取书籍信息
-          bookInfo = await web_book_info(bookId, cookie);
+          bookInfo = await web_book_info(
+            bookId,
+            credentialUtil.getCookieByCredential(credential),
+          );
 
           // 为下一个请求添加随机延迟，模拟真实用户浏览网页的时间
           await randomDelay(1000, 3000);
 
           // 然后获取章节信息
-          chapterInfos = await web_book_chapterInfos([bookId], cookie);
+          chapterInfos = await web_book_chapterInfos(
+            [bookId],
+            credentialUtil.getCookieByCredential(credential),
+          );
         } catch (error) {
           console.error("获取书籍信息失败:", error);
           sendEvent(
@@ -236,7 +275,7 @@ export function downloadSSE(
             [title, html, style] = await safeDownloadChapter(
               bookInfo,
               chapter,
-              cookie,
+              credential,
             );
           } catch (error) {
             console.error(`下载章节 "${chapter.title}" 失败:`, error);

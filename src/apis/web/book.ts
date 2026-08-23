@@ -20,6 +20,25 @@ import { chapterTitleText, M278, showChapterTitle } from "./utils.ts";
 import type { BookInfo, ChapterInfo } from "./utils.ts";
 import { checkErrCode } from "../err-code.ts";
 
+export async function readEncryptedResponse(resp: Response, cookie: string) {
+  await checkErrCode(resp, cookie);
+  if (resp.headers.get("Content-Type")?.includes("json")) {
+    const data = await resp.json();
+    if (typeof data === "object" && data !== null) {
+      const entry = data as Record<string, unknown>;
+      const error = new Error(
+        String(entry.errMsg ?? entry.errmsg ?? "章节接口返回错误"),
+      );
+      Object.assign(error, entry);
+      throw error;
+    }
+    throw new Error(String(data));
+  }
+
+  const data = await resp.text();
+  return data && typeof data === "string" ? chk(data) : "";
+}
+
 /**
  * 获取图书详情
  * @param bookId
@@ -222,9 +241,7 @@ export async function web_book_chapter_e0(
       cookie: cookie,
     },
   );
-  await checkErrCode(resp, cookie);
-  const data = await resp.text();
-  return data && "string" === typeof data ? chk(data) : "";
+  return readEncryptedResponse(resp, cookie);
 }
 
 export async function web_book_chapter_e1(
@@ -250,9 +267,7 @@ export async function web_book_chapter_e1(
       cookie: cookie,
     },
   );
-  await checkErrCode(resp, cookie);
-  const data = await resp.text();
-  return data && "string" === typeof data ? chk(data) : "";
+  return readEncryptedResponse(resp, cookie);
 }
 
 export async function web_book_chapter_e2(
@@ -278,9 +293,7 @@ export async function web_book_chapter_e2(
       cookie: cookie,
     },
   );
-  await checkErrCode(resp, cookie);
-  const data = await resp.text();
-  return data && "string" === typeof data ? chk(data) : "";
+  return readEncryptedResponse(resp, cookie);
 }
 
 export async function web_book_chapter_e3(
@@ -306,9 +319,7 @@ export async function web_book_chapter_e3(
       cookie: cookie,
     },
   );
-  await checkErrCode(resp, cookie);
-  const data = await resp.text();
-  return data && "string" === typeof data ? chk(data) : "";
+  return readEncryptedResponse(resp, cookie);
 }
 
 export async function web_book_chapter_t0(
@@ -334,9 +345,7 @@ export async function web_book_chapter_t0(
       cookie: cookie,
     },
   );
-  await checkErrCode(resp, cookie);
-  const data = await resp.text();
-  return data && "string" === typeof data ? chk(data) : "";
+  return readEncryptedResponse(resp, cookie);
 }
 
 export async function web_book_chapter_t1(
@@ -362,9 +371,7 @@ export async function web_book_chapter_t1(
       cookie: cookie,
     },
   );
-  await checkErrCode(resp, cookie);
-  const data = await resp.text();
-  return data && "string" === typeof data ? chk(data) : "";
+  return readEncryptedResponse(resp, cookie);
 }
 
 /**

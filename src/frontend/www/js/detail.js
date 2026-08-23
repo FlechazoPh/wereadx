@@ -254,28 +254,6 @@ async function fetchAndRenderBookInfo(token) {
 
   const chapters = bookTocResp.data.data[0].updated;
 
-  // 处理 anchors
-  for (let i = 0; i < chapters.length; i++) {
-    const chapter = chapters[i];
-
-    chapter.level = chapter.level || 1;
-
-    if (Array.isArray(chapter.anchors) && chapter.anchors.length > 0) {
-      const anchors = chapter.anchors;
-      delete chapter["anchors"];
-      const anchorChapters = anchors.map((anchor) => ({
-        ...chapter,
-        title: anchor.title,
-        level: anchor.level,
-        anchor: anchor.anchor,
-        isAnchor: true,
-      }));
-
-      // 把 anchor 插入到顶层位置
-      chapters.splice(i + 1, 0, ...anchorChapters);
-    }
-  }
-
   // 构造成树形结构
   bookToc = convertChaptersToToc(chapters);
 

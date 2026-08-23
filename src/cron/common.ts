@@ -3,7 +3,7 @@
 import * as credentialUtil from "../kv/credential.ts";
 import { Credential } from "../kv/credential.ts";
 import { ApiCallResponse, ResponseCode } from "../frontend/apis/common.ts";
-import { web_login_renewal } from "../apis/web/login.ts";
+import { renewCredential } from "../apis/web/login.ts";
 import runtime from "../runtime.ts";
 import { errorMessage } from "../utils/index.ts";
 
@@ -33,8 +33,6 @@ export async function executeApiCallWithRetry(
         msg: `token(${token})未查询到用户信息`,
       };
     }
-    const cookie = credentialUtil.getCookieByCredential(credential);
-
     const resp = await apiCall(credential);
     if (
       resp &&
@@ -50,15 +48,10 @@ export async function executeApiCallWithRetry(
       // skey过期，重新刷新
       // console.debug()
       try {
-        const credentialInfo = await web_login_renewal(
+        await renewCredential(
+          token,
           "/web/shelf/sync",
-          cookie,
         );
-        const { accessToken, refreshToken } = credentialInfo;
-        credential.skey = accessToken;
-        credential.rt = refreshToken;
-        credential.updatedAt = Date.now();
-        await credentialUtil.update(credential);
 
         // 重新调用原始接口
         return executor(--retry);
